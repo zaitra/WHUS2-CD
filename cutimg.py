@@ -18,39 +18,39 @@ sourcedir
         /60m/file1.tif...filen.tif   (3 bands 1/9/10)
 """
  
-sourcedir='F:/WHU/WHUS2-CD+/'#source dir  
-types=["train","test"]  
-names=['10m','20m','60m']
-window_sizes,strides=[384,192,64],[384,192,64]
+sourcedir = '/data/whus-cd+/'#source dir  
+types = ["dataset"]  
+names = ['10m','20m','60m']
+window_sizes, strides = [512,256,85],[512,256,85]
 
-def cut_data(filetype,name,window_size,stride):
-    filedir=sourcedir+filetype+"/"+name
-    print(filedir) 
-    filedirs=glob.glob(os.path.join(filedir, '*'))
+def cut_data(filetype, name, window_size, stride):
+    filedir = sourcedir + filetype + "/" + name
+    print(filedir)
+    filedirs = glob.glob(os.path.join(filedir, '*'))
     for i in range(len(filedirs)):
-        filepath=filedirs[i]
+        filepath = filedirs[i]
         print(filepath)
-        savedirname=filepath.split('\\')[-1].split('.tif')[0][33:44]
-        savedirpath=filedir.replace(filetype,filetype+'DNclips')+"/"+savedirname
+        savedirname = filepath.split('\\')[-1].split('.tif')[0][33:44]
+        savedirpath = filedir.replace(filetype, filetype + 'DNclips') + "/" + savedirname
         if not os.path.exists(savedirpath):
             os.makedirs(savedirpath)
         img = imgread(filepath)
-        h,w=img.shape[0],img.shape[1]
-        h_steps=(w-window_size)//stride+1
-        w_steps=(h-window_size)//stride+1
-        n=0
+        h, w = img.shape[0], img.shape[1]
+        h_steps = (w - window_size) // stride+1
+        w_steps = (h - window_size) // stride+1
+        n = 0
         for i in range(h_steps):
-            high=i*stride
+            high = i * stride
             for j in range(w_steps):
-                width=j*stride
-                n=n+1
-                if np.all(img[high:high+window_size,width:width+window_size]>0):
-                    imgwrite(savedirpath+"/"+str(n)+'.tif',img[high:high+window_size,width:width+window_size])
-def multi_dir(filetype,name,window_size,stride):     
-    cut_data(filetype,name,window_size,stride)
+                width = j * stride
+                n += 1
+                if np.all(img[high:high+window_size, width:width+window_size] > 0):
+                    imgwrite(savedirpath + "/" + str(n) + '.tif', img[high:high+window_size, width:width+window_size])
+
+def multi_dir(filetype, name, window_size, stride):
+    cut_data(filetype, name, window_size, stride)
+
 for i in range(len(types)):
-    filetype=types[i]
-    for j in range(len(names)):  
-        multi_dir(filetype,names[j],window_sizes[j],strides[j])
-
-
+    filetype = types[i]
+    for j in range(len(names)):
+        multi_dir(filetype, names[j], window_sizes[j], strides[j])
